@@ -1,73 +1,62 @@
-# How to change the Cell background based on bool value in .NET MAUI DataGrid?
+# How to hightlight row when hovered in .NET MAUI DataGrid?
 
-The [.NET MAUI DataGrid](https://www.syncfusion.com/maui-controls/maui-datagrid) provides support to customize the background of a [DataGridCell](https://help.syncfusion.com/cr/maui/Syncfusion.Maui.DataGrid.DataGridCell.html) based on a bool value.
+The [.NET MAUI DataGrid](https://www.syncfusion.com/maui-controls/maui-datagrid) currently does not support highlighting the row when hovered. However, we can implement a workaround to achieve this behavior.
 
-##### XAML
-We create a custom style targetting the DataGridCell in the Resource Dictionary.
-
-```XML
-<ContentPage.Resources>
-    <local:ColorConverter x:Key="converter"/>
-    <Style TargetType="syncfusion:DataGridCell" x:Key="customCellStyle">
-        <Setter Property="Background" Value="{Binding EmployeeStatus, Converter={StaticResource Key=converter}}"/>
-    </Style>
-</ContentPage.Resources>
-```
-
-Then we set the key value to the CellStyle property of the particular column we want to customize.
-```XML
-<syncfusion:SfDataGrid ItemsSource="{Binding Employees}" CellTapped="SfDataGrid_CellTapped">
-    <syncfusion:SfDataGrid.Columns>
-        <syncfusion:DataGridNumericColumn MappingName="EmployeeID" 
-                                          HeaderText="Employee ID" 
-                                          Format="d"
-                                          ColumnWidthMode="Auto"
-                                          CellStyle="{StaticResource customCellStyle}"/>        
-    </syncfusion:SfDataGrid.Columns>
-</syncfusion:SfDataGrid>
-```
+To achieve this behavior, we can utilize the [CellEntered](https://help.syncfusion.com/maui/datagrid/grid-events#cellentered-event) and [CellExited](https://help.syncfusion.com/maui/datagrid/grid-events#cellexited-event) events of the datagrid.
 ##### C#
 
-In the cell tapped event we will modify the bool value, which will trigger the converter.
+In the 'CellEntered' event, we will pass the row index of the current row where the pointer has entered to set the background color of the row.
 ```C#
-private void SfDataGrid_CellTapped(object sender, DataGridCellTappedEventArgs e)
+private void dataGrid_CellEntered(object sender, DataGridCellEnteredEventArgs e)
 {
-    if (e.RowData != null && viewModel.Employees.Contains(e!.RowData))
+    var rowIndex = e.RowColumnIndex.RowIndex;
+    var dataRow = GetDataRowBase(rowIndex);
+    if (dataRow != null && rowIndex > 0)
     {
-        int index = viewModel.Employees.IndexOf((e.RowData as Employee)!);
-        viewModel.Employees[index].EmployeeStatus = !viewModel.Employees[index].EmployeeStatus;
-    }
-}
-```
-In the converter we set the background based on the bool value.
-```C#
-public class ColorConverter : IValueConverter
-{
-    object IValueConverter.Convert(object? value, Type targetType, object? parameter, CultureInfo info)
-    {
-        if ((bool)value!)
-            return Color.FromArgb("bde0fe"); 
-        else
-            return Colors.Transparent;
-    }
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
+        GetDataGridRow(dataRow)!.BackgroundColor = Color.FromArgb("#caf0f8");
     }
 }
 ```
 
-The following GIF demonstrates the customization of datagrid cell background based on bool value.
+In the 'CellExited' event, we will pass the row index of the current row where the pointer has exited to revert the the background color of the row.
+```C#
 
-![DataGrid with DataGridCell Color](SfDataGrid_sample.gif)
+private void dataGrid_CellExited(object sender, DataGridCellExitedEventArgs e)
+{
+    var rowIndex = e.RowColumnIndex.RowIndex;
+    var dataRow = GetDataRowBase(rowIndex);
+    if (dataRow != null && rowIndex > 0)
+    {
+        GetDataGridRow(dataRow)!.BackgroundColor = (this.dataGrid.DefaultStyle.RowBackground as SolidColorBrush)!.Color;
+    }
+}
+```
+We can use this helper method to get the row element.
+```C#
+private DataRowBase? GetDataRowBase(int index)
+{
+    return dataGrid.GetRowGenerator().Items!.FirstOrDefault(x => x.RowIndex == index);
+}
 
-[View sample in GitHub](https://github.com/SyncfusionExamples/How-to-change-the-Cell-background-color-based-on-bool-value-in-.NET-MAUI-DataGrid)
+private DataGridRow? GetDataGridRow(DataRowBase dataRowBase)
+{
+    var wholeRowElement = dataRowBase?.GetType()!.GetRuntimeFields().FirstOrDefault(x => x.Name.Equals("WholeRowElement"))!.GetValue(dataRowBase);
+    return wholeRowElement as DataGridRow;
+
+}
+```
+
+The following GIF demonstrates the highlight of row when hovered.
+
+![DataGrid with DataGridCell Color](SfDataGrid_Row_Hightlight.gif)
+
+[View sample in GitHub](https://github.com/SyncfusionExamples/How-to-hightlight-row-when-hovered-in-MAUI-DataGrid/tree/master)
 
 Take a moment to pursue this [documentation](https://help.syncfusion.com/maui/datagrid/overview), where you can find more about Syncfusion .NET MAUI DataGrid (SfDataGrid) with code examples.
 Please refer to this [link](https://www.syncfusion.com/maui-controls/maui-datagrid) to learn about the essential features of Syncfusion .NET MAUI DataGrid(SfDataGrid).
 
 #### Conclusion
-I hope you enjoyed learning about how to change the datagrid cell background based on bool value in .NET MAUI DataGrid?
+I hope you enjoyed learning about how to highlight of row when hovered in .NET MAUI DataGrid?
 
 You can refer to our [.NET MAUI DataGrid's feature tour](https://www.syncfusion.com/maui-controls/maui-datagrid) page to know about its other groundbreaking feature representations. You can also explore our .NET MAUI DataGrid Documentation to understand how to present and manipulate data.
 For current customers, you can check out our .NET MAUI components from the [License and Downloads](https://www.syncfusion.com/account/downloads) page. If you are new to Syncfusion, you can try our 30-day free trial to check out our .NET MAUI DataGrid and other .NET MAUI components.
