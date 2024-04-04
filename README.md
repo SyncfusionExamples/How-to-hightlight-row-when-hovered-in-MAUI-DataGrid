@@ -1,11 +1,9 @@
 # How to hightlight row when hovered in .NET MAUI DataGrid?
+We can utilize the [CellEntered](https://help.syncfusion.com/maui/datagrid/grid-events#cellentered-event) and [CellExited](https://help.syncfusion.com/maui/datagrid/grid-events#cellexited-event) events of the [.NET MAUI DataGrid](https://www.syncfusion.com/maui-controls/maui-datagrid) to hightlight the row when hovered.
 
-The [.NET MAUI DataGrid](https://www.syncfusion.com/maui-controls/maui-datagrid) currently does not support highlighting the row when hovered. However, we can implement a workaround to achieve this behavior.
-
-To achieve this behavior, we can utilize the [CellEntered](https://help.syncfusion.com/maui/datagrid/grid-events#cellentered-event) and [CellExited](https://help.syncfusion.com/maui/datagrid/grid-events#cellexited-event) events of the datagrid.
 ##### C#
 
-In the 'CellEntered' event, we will pass the row index of the current row where the pointer has entered to set the background color of the row.
+In the `CellEntered` event, we will pass the row index of the current row where the pointer has entered to set the background color of the row.
 ```C#
 private void dataGrid_CellEntered(object sender, DataGridCellEnteredEventArgs e)
 {
@@ -18,7 +16,7 @@ private void dataGrid_CellEntered(object sender, DataGridCellEnteredEventArgs e)
 }
 ```
 
-In the 'CellExited' event, we will pass the row index of the current row where the pointer has exited to revert the the background color of the row.
+In the `CellExited` event, we will pass the row index of the current row where the pointer has exited to revert the the background color of the row.
 ```C#
 
 private void dataGrid_CellExited(object sender, DataGridCellExitedEventArgs e)
